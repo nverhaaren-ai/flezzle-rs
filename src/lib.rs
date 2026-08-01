@@ -32,25 +32,24 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        // TODO(project-01): assemble the game. Broadly, this plugin needs to:
-        //
-        //   1. Add the third-party plugins: `LdtkPlugin` (loads .ldtk files as
-        //      Bevy assets and spawns levels) and Avian's `PhysicsPlugins`.
-        //   2. Configure the world: a `Gravity` resource (the reference level
-        //      plays well with a strong downward pull, e.g. (0, -2000)), a
-        //      `LevelSelection` (the level with Uid 0), and `LdtkSettings`
-        //      (spawn levels at their world translation, loading neighbors;
-        //      clear color from the level background).
-        //   3. Add this crate's gameplay plugins/systems (see the modules
-        //      above): game flow, walls, ground detection, climbing, player,
-        //      enemies, misc objects — plus the `inventory::dbg_print_inventory`
-        //      and `camera::camera_fit_inside_current_level` systems.
-        //
-        // The upstream `bevy_ecs_ldtk` platformer example is the reference —
-        // see the workbook project README for links and study notes.
-        //
-        // (The unused-import warnings on this file disappear as you wire
-        // things up — they're a hint about which preludes you'll need.)
-        let _ = app;
+        app.add_plugins((LdtkPlugin, PhysicsPlugins::default()))
+            .insert_resource(Gravity(Vec2::new(0.0, -2000.0)))
+            .insert_resource(LevelSelection::Uid(0))
+            .insert_resource(LdtkSettings {
+                level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
+                    load_level_neighbors: true,
+                },
+                set_clear_color: SetClearColor::FromLevelBackground,
+                ..Default::default()
+            })
+            .add_plugins(game_flow::GameFlowPlugin)
+            .add_plugins(walls::WallPlugin)
+            .add_plugins(ground_detection::GroundDetectionPlugin)
+            .add_plugins(climbing::ClimbingPlugin)
+            .add_plugins(player::PlayerPlugin)
+            .add_plugins(enemy::EnemyPlugin)
+            .add_systems(Update, inventory::dbg_print_inventory)
+            .add_systems(Update, camera::camera_fit_inside_current_level)
+            .add_plugins(misc_objects::MiscObjectsPlugin);
     }
 }

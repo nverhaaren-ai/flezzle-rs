@@ -33,22 +33,30 @@ pub fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut LinearVelocity, &mut Climber, &GroundDetection), With<Player>>,
 ) {
-    // TODO(project-01): implement the player controls.
-    //
-    // Desired behavior, for each player entity in `query`:
-    //   - A/D set horizontal velocity: 200 px/s left/right (0 if neither or
-    //     both are held).
-    //   - Climbing: if the climber intersects no climbables, it is not
-    //     climbing; pressing W or S while touching a climbable starts
-    //     climbing. While climbing, W/S set vertical velocity to ±200 px/s
-    //     (0 if neither or both).
-    //   - Space jumps (vertical velocity 500) when on the ground or climbing,
-    //     and cancels climbing.
-    //
-    // Velocity is Avian's `LinearVelocity` (`.x` / `.y`). Key state comes
-    // from `ButtonInput<KeyCode>` (`pressed` vs `just_pressed` — think about
-    // which fits where).
-    let _ = (&input, &mut query);
+    for (mut velocity, mut climber, ground_detection) in &mut query {
+        let right = if input.pressed(KeyCode::KeyD) { 1. } else { 0. };
+        let left = if input.pressed(KeyCode::KeyA) { 1. } else { 0. };
+
+        velocity.x = (right - left) * 200.;
+
+        if climber.intersecting_climbables.is_empty() {
+            climber.climbing = false;
+        } else if input.just_pressed(KeyCode::KeyW) || input.just_pressed(KeyCode::KeyS) {
+            climber.climbing = true;
+        }
+
+        if climber.climbing {
+            let up = if input.pressed(KeyCode::KeyW) { 1. } else { 0. };
+            let down = if input.pressed(KeyCode::KeyS) { 1. } else { 0. };
+
+            velocity.y = (up - down) * 200.;
+        }
+
+        if input.just_pressed(KeyCode::Space) && (ground_detection.on_ground || climber.climbing) {
+            velocity.y = 500.;
+            climber.climbing = false;
+        }
+    }
 }
 
 pub struct PlayerPlugin;
