@@ -10,7 +10,7 @@ below are the canonical task store, and the diagram is generated from them.
 <!-- task-dag:graph -->
 ```mermaid
 graph LR
-  F1["F1 Run the `bevy_ecs_ldtk` platformer example nati…"]:::pending
+  F1["F1 Run the `bevy_ecs_ldtk` platformer example nati…"]:::inprogress
   F2["F2 Determinism pass: discrete tick clock (FixedUpd…"]:::pending
   F3["F3 Bare-bones WASM build playable in a browser (no…"]:::pending
   F4["F4 Verify determinism empirically: same input sequ…"]:::pending
@@ -46,7 +46,7 @@ graph LR
 
 | ID | Task | Depends on | Status |
 |----|------|-----------|--------|
-| F1 | Run the `bevy_ecs_ldtk` platformer example natively; pin Bevy / bevy_ecs_ldtk / Rapier versions | — | `[ ]` |
+| F1 | Run the `bevy_ecs_ldtk` platformer example natively; pin Bevy / bevy_ecs_ldtk / Avian versions | — | `[~]` |
 | F2 | Determinism pass: discrete tick clock (FixedUpdate, constant dt), explicit system ordering, no HashMap-iteration-order leaks, seeded RNG only | F1 | `[ ]` |
 | F3 | Bare-bones WASM build playable in a browser (no threads, no SIMD) | F1 | `[ ]` |
 | F4 | Verify determinism empirically: same input sequence → same trace, natively and in WASM; note any native-vs-WASM divergence | F2, F3 | `[ ]` |
