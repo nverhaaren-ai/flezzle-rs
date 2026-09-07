@@ -114,7 +114,7 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, patrol)
+        app.add_systems(FixedUpdate, patrol.in_set(crate::GameplaySet::Act))
             .register_ldtk_entity::<MobBundle>("Mob");
     }
 }
