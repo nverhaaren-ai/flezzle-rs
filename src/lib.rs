@@ -21,6 +21,7 @@ pub mod game_flow;
 pub mod ground_detection;
 pub mod input;
 pub mod inventory;
+pub mod level;
 pub mod misc_objects;
 pub mod player;
 pub mod walls;
@@ -56,8 +57,8 @@ impl Plugin for GamePlugin {
                 (GameplaySet::Sense, GameplaySet::Act, GameplaySet::World).chain(),
             )
             .add_plugins(input::TickInputPlugin)
+            .add_plugins(level::LevelPlugin)
             .insert_resource(Gravity(Vec2::new(0.0, -2000.0)))
-            .insert_resource(LevelSelection::Uid(0))
             .insert_resource(LdtkSettings {
                 level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
                     load_level_neighbors: true,

@@ -4,25 +4,14 @@ use avian2d::prelude::*;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-pub fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut physics_time: ResMut<Time<Physics>>,
-) {
+pub fn setup(mut commands: Commands, mut physics_time: ResMut<Time<Physics>>) {
     commands.spawn(Camera2d);
 
     // The wall colliders spawn one frame later than the player and other
     // entities. Only start the physics simulation after that (in
-    // [start_physics]), so they don't end up in the ground.
+    // [start_physics]), so they don't end up in the ground. The LDtk world
+    // itself is spawned by `level::spawn_level_on_change`.
     physics_time.pause();
-
-    let ldtk_handle = asset_server
-        .load("Typical_2D_platformer_example.ldtk")
-        .into();
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle,
-        ..Default::default()
-    });
 }
 
 fn start_physics(

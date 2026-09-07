@@ -9,13 +9,30 @@ repository = "https://github.com/nverhaaren/flezzle-rs"
 [dependencies]
 # Versions mirror the bevy_ecs_ldtk v0.15.0 platformer example; exact
 # resolution is pinned by the committed Cargo.lock (+ rust-toolchain.toml).
-bevy = "0.19"
+# `webgl2` only matters for the browser build (WebGL2 is the compatible
+# choice; WebGPU can come later). Harmless natively.
+bevy = { version = "0.19", features = ["webgl2"] }
 # `atlas` swaps texture arrays for texture atlases. We want it twice over:
 # it's the mode intended for WASM/WebGL2 (our eventual canonical target), and
 # without it bevy_ecs_tilemap's build() hard-requires a render sub-app, which
 # breaks GPU-less headless runs (tests, future fuzzing).
 bevy_ecs_ldtk = { version = "0.15", features = ["atlas"] }
 avian2d = "0.7"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["Window", "Location", "UrlSearchParams"] }
+# getrandom needs to be told to use JS randomness on wasm32-unknown-unknown
+# (paired with the --cfg in .cargo/config.toml).
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
+# Small, slow-to-build browser bundles: `trunk build` uses this profile.
+[profile.wasm-release]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
 
 # Bevy is unplayably slow in unoptimized dev builds; optimize dependencies
 # even in dev (the standard Bevy setup), keeping fast incremental rebuilds

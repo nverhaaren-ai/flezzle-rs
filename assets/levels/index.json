@@ -1,0 +1,6 @@
+[
+  { "name": "First steps", "path": "levels/first-steps.ldtk", "about": "A gentle start: platforms, a ladder, one patrolling mob, a chest to shove." },
+  { "name": "Ladder tower", "path": "levels/ladder-tower.ldtk", "about": "Climb a narrow tower; mobs on the landings, pumpkins at the top." },
+  { "name": "Example world", "path": "levels/example_world.ldtk", "about": "The bevy_ecs_ldtk sample: three connected levels. Walk off the edges." },
+  { "name": "Template", "path": "levels/template.ldtk", "about": "Flat ground and a chest. The file to save-as when making your own level." }
+]
