@@ -4,6 +4,7 @@
 //! `?level=levels/foo.ldtk` on the web. The web page can also hand us an
 //! uploaded `.ldtk` file (see `web/index.html`).
 
+use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use flezzle_rs::level::{register_user_level_source, LevelSource};
 use flezzle_rs::GamePlugin;
@@ -16,7 +17,17 @@ fn main() {
 
     app.add_plugins(
         DefaultPlugins
+            .build()
+            // No sounds yet; on the web an AudioContext also can't start
+            // before a user gesture, which only produces console warnings.
+            .disable::<bevy::audio::AudioPlugin>()
             .set(ImagePlugin::default_nearest())
+            .set(AssetPlugin {
+                // Don't probe for `.meta` sidecar files: on the web every
+                // asset load would first 404 on `<asset>.meta`.
+                meta_check: AssetMetaCheck::Never,
+                ..Default::default()
+            })
             .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "flezzle-rs".into(),

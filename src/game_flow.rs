@@ -19,7 +19,8 @@ fn start_physics(
     mut physics_time: ResMut<Time<Physics>>,
 ) {
     for event in level_events.read() {
-        if let LevelEvent::Transformed(_) = event {
+        if let LevelEvent::Transformed(iid) = event {
+            info!("level spawned: {iid}");
             physics_time.unpause();
         }
     }

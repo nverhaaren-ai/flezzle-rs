@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flezzle-rs</title>
+  <link rel="icon" href="data:,">
+  <link data-trunk rel="rust" href="../Cargo.toml" data-bin="flezzle-rs" data-wasm-opt="s">
+  <link data-trunk rel="copy-dir" href="../assets">
+  <style>
+    :root { color-scheme: dark; }
+    html, body { margin: 0; height: 100%; background: #14131a; color: #e8e6f0; font: 14px/1.4 system-ui, sans-serif; }
+    body { display: flex; flex-direction: column; }
+    header { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: center; padding: .5rem .75rem; background: #1e1c27; border-bottom: 1px solid #2f2c3d; }
+    header h1 { font-size: 1rem; margin: 0 .5rem 0 0; font-weight: 600; letter-spacing: .02em; }
+    header label { display: inline-flex; gap: .4rem; align-items: center; }
+    select, input[type=file] { font: inherit; }
+    #about { opacity: .75; }
+    #game { flex: 1; min-height: 0; position: relative; }
+    #flezzle-canvas { display: block; width: 100%; height: 100%; outline: none; image-rendering: pixelated; }
+    #hint { position: absolute; left: .75rem; bottom: .5rem; opacity: .55; font-size: 12px; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>flezzle-rs</h1>
+    <label>Level <select id="levels"></select></label>
+    <label>…or open your own <input id="upload" type="file" accept=".ldtk,application/json"></label>
+    <span id="about"></span>
+  </header>
+  <div id="game">
+    <canvas id="flezzle-canvas" tabindex="0"></canvas>
+    <div id="hint">A/D move · Space jump · W/S climb · R restart · click the game first if keys don't register</div>
+  </div>
+  <script>
+    // Keep in sync with DEFAULT_LEVEL in src/level.rs: what the game loads
+    // when the URL has no ?level=.
+    const DEFAULT_LEVEL = "levels/example_world.ldtk";
+    const params = new URLSearchParams(location.search);
+    const current = params.get("level") ?? DEFAULT_LEVEL;
+    const select = document.getElementById("levels");
+    const about = document.getElementById("about");
+
+    fetch("assets/levels/index.json").then(r => r.json()).then(levels => {
+      for (const lvl of levels) {
+        const opt = document.createElement("option");
+        opt.value = lvl.path; opt.textContent = lvl.name; opt.dataset.about = lvl.about ?? "";
+        select.append(opt);
+      }
+      select.value = current;
+      about.textContent = select.selectedOptions[0]?.dataset.about ?? "";
+    }).catch(() => { about.textContent = "(level list unavailable)"; });
+
+    select.addEventListener("change", () => {
+      location.search = "?level=" + encodeURIComponent(select.value);
+    });
+
+    // Uploaded levels are handed to the game as bytes; it polls this slot.
+    document.getElementById("upload").addEventListener("change", async (ev) => {
+      const file = ev.target.files?.[0];
+      if (!file) return;
+      window.flezzlePendingLevel = new Uint8Array(await file.arrayBuffer());
+      about.textContent = "Loaded " + file.name + " (uses the bundled tileset)";
+      document.getElementById("flezzle-canvas").focus();
+    });
+  </script>
+</body>
+</html>
