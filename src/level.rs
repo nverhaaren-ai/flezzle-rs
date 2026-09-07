@@ -104,6 +104,35 @@ fn spawn_level_on_change(
     ));
 }
 
+/// Once the project asset is available, replace an index-based
+/// `LevelSelection` with the iid of the level it denotes.
+///
+/// Why: gameplay code that asks "is this the selected level?" (camera
+/// fitting, following the player between neighbours) calls
+/// `LevelSelection::is_match(&LevelIndices::default(), level)`, passing
+/// placeholder indices — fine for identifier/iid/uid selections, but an
+/// index selection compares those placeholders and matches *every* level.
+/// Pinning to the iid keeps the "play the first level of any file" default
+/// while making the selection unambiguous.
+fn pin_level_selection_to_iid(
+    mut level_selection: ResMut<LevelSelection>,
+    worlds: Query<&LdtkProjectHandle, With<LevelWorld>>,
+    projects: Res<Assets<LdtkProject>>,
+) {
+    let LevelSelection::Indices(indices) = &*level_selection else {
+        return;
+    };
+    let Ok(handle) = worlds.single() else {
+        return;
+    };
+    let Some(project) = projects.get(handle) else {
+        return;
+    };
+    if let Some(level) = project.get_raw_level_at_indices(indices) {
+        *level_selection = LevelSelection::iid(level.iid.clone());
+    }
+}
+
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
@@ -112,7 +141,9 @@ impl Plugin for LevelPlugin {
             .insert_resource(LevelSelection::index(0))
             .add_systems(
                 FixedUpdate,
-                spawn_level_on_change.in_set(crate::GameplaySet::World),
+                (spawn_level_on_change, pin_level_selection_to_iid)
+                    .chain()
+                    .in_set(crate::GameplaySet::World),
             );
         #[cfg(target_arch = "wasm32")]
         app.add_systems(Update, web::poll_uploaded_level);

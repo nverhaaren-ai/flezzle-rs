@@ -99,3 +99,39 @@ fn uploaded_level_bytes_load_through_user_source() {
     });
     assert!(loaded, "uploaded level should spawn through the in-memory source");
 }
+
+/// The camera must frame the level the player is in. The upstream camera code
+/// matches levels against `LevelSelection`; with an index-based selection the
+/// placeholder indices it passes match *every* level, so the camera framed
+/// whichever level came last. Regression test for the fix (pinning the
+/// selection to the spawned level's iid).
+#[test]
+fn camera_frames_the_players_level() {
+    use bevy::camera::Camera;
+    let mut app = headless_app_for(Some("levels/example_world.ldtk"));
+    let player = spawn_and_settle(&mut app);
+
+    let cam = app
+        .world_mut()
+        .query_filtered::<&GlobalTransform, With<Camera>>()
+        .iter(app.world())
+        .next()
+        .map(|t| t.translation().truncate())
+        .expect("camera");
+
+    // Main level of example_world is 848x336 at LDtk world (0, 0). LDtk is
+    // y-down, so with UseWorldTranslation its Bevy origin is (0, -336). The
+    // camera's translation is its bottom-left corner (viewport_origin = 0);
+    // it must lie inside that level and the player must be within the framed
+    // 16:9 window.
+    let (level_x, level_y) = (0.0, -336.0);
+    assert!(
+        (level_x..=level_x + 848.0).contains(&cam.x) && (level_y..=level_y + 336.0).contains(&cam.y),
+        "camera bottom-left {cam} is outside the player's level"
+    );
+    let framed_w = 336.0 * 16.0 / 9.0;
+    assert!(
+        (cam.x..=cam.x + framed_w).contains(&player.x) && (cam.y..=cam.y + 336.0).contains(&player.y),
+        "player {player} is not inside the camera window starting at {cam}"
+    );
+}
