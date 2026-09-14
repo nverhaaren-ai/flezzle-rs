@@ -188,7 +188,7 @@ pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, spawn_wall_collision)
+        app.add_systems(FixedUpdate, spawn_wall_collision.in_set(crate::GameplaySet::World))
             .register_ldtk_int_cell::<WallBundle>(1) //dirt
             .register_ldtk_int_cell::<WallBundle>(3); //stone
     }

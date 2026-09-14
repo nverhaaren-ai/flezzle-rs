@@ -19,10 +19,28 @@ pub mod colliders;
 pub mod enemy;
 pub mod game_flow;
 pub mod ground_detection;
+pub mod input;
 pub mod inventory;
+pub mod level;
 pub mod misc_objects;
 pub mod player;
 pub mod walls;
+
+/// Simulation tick rate. Gameplay and physics both step on Bevy's fixed
+/// clock at this rate; rendering runs at whatever the display does.
+pub const TICK_HZ: f64 = 60.0;
+
+/// Ordering of gameplay systems within each fixed tick. Physics (Avian)
+/// steps afterwards in `FixedPostUpdate`.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum GameplaySet {
+    /// Read the world: ground/ladder contact from last tick's physics.
+    Sense,
+    /// Decide: player controls, enemy patrol, gravity toggles.
+    Act,
+    /// Housekeeping: spawn colliders/sensors, level flow.
+    World,
+}
 
 /// All gameplay wiring: LDtk loading, physics, and the game's systems.
 ///
@@ -33,8 +51,14 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((LdtkPlugin, PhysicsPlugins::default()))
+            .insert_resource(Time::<Fixed>::from_hz(TICK_HZ))
+            .configure_sets(
+                FixedUpdate,
+                (GameplaySet::Sense, GameplaySet::Act, GameplaySet::World).chain(),
+            )
+            .add_plugins(input::TickInputPlugin)
+            .add_plugins(level::LevelPlugin)
             .insert_resource(Gravity(Vec2::new(0.0, -2000.0)))
-            .insert_resource(LevelSelection::Uid(0))
             .insert_resource(LdtkSettings {
                 level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
                     load_level_neighbors: true,
@@ -48,7 +72,10 @@ impl Plugin for GamePlugin {
             .add_plugins(climbing::ClimbingPlugin)
             .add_plugins(player::PlayerPlugin)
             .add_plugins(enemy::EnemyPlugin)
-            .add_systems(Update, inventory::dbg_print_inventory)
+            .add_systems(
+                FixedUpdate,
+                inventory::dbg_print_inventory.in_set(GameplaySet::World),
+            )
             .add_systems(Update, camera::camera_fit_inside_current_level)
             .add_plugins(misc_objects::MiscObjectsPlugin);
     }

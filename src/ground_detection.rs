@@ -104,8 +104,12 @@ pub struct GroundDetectionPlugin;
 
 impl Plugin for GroundDetectionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, spawn_ground_sensor)
-            .add_systems(Update, ground_detection)
-            .add_systems(Update, update_on_ground);
+        app.add_systems(FixedUpdate, spawn_ground_sensor.in_set(crate::GameplaySet::World))
+            .add_systems(
+                FixedUpdate,
+                (ground_detection, update_on_ground)
+                    .chain()
+                    .in_set(crate::GameplaySet::Sense),
+            );
     }
 }

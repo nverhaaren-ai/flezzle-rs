@@ -11,14 +11,14 @@ below are the canonical task store, and the diagram is generated from them.
 ```mermaid
 graph LR
   F1["F1 Run the `bevy_ecs_ldtk` platformer example nati…"]:::inprogress
-  F2["F2 Determinism pass: discrete tick clock (FixedUpd…"]:::pending
-  F3["F3 Bare-bones WASM build playable in a browser (no…"]:::pending
+  F2["F2 Determinism pass: discrete tick clock (FixedUpd…"]:::inprogress
+  F3["F3 Bare-bones WASM build playable in a browser (no…"]:::done
   F4["F4 Verify determinism empirically: same input sequ…"]:::pending
   F5["F5 Input trace format + record/replay: save a play…"]:::pending
   F6["F6 Random input trace generator — the first fuzzin…"]:::pending
   F7["F7 Prior-art survey for exploration harness: AFL++…"]:::pending
-  F8["F8 Support user-authored LDtk levels, starting wit…"]:::pending
-  F9["F9 Minimal asset story for custom levels: bundled …"]:::pending
+  F8["F8 Support user-authored LDtk levels, starting wit…"]:::inprogress
+  F9["F9 Minimal asset story for custom levels: bundled …"]:::inprogress
   F10["F10 IJON-style state annotations (e.g. maximize pla…"]:::pending
   F11["F11 First exploration experiment: drive the game wi…"]:::pending
   F1 --> F2
@@ -47,8 +47,8 @@ graph LR
 | ID | Task | Depends on | Status |
 |----|------|-----------|--------|
 | F1 | Run the `bevy_ecs_ldtk` platformer example natively; pin Bevy / bevy_ecs_ldtk / Avian versions | — | `[~]` |
-| F2 | Determinism pass: discrete tick clock (FixedUpdate, constant dt), explicit system ordering, no HashMap-iteration-order leaks, seeded RNG only | F1 | `[ ]` |
-| F3 | Bare-bones WASM build playable in a browser (no threads, no SIMD) | F1 | `[ ]` |
+| F2 | Determinism pass: discrete tick clock (FixedUpdate, constant dt), explicit system ordering, no HashMap-iteration-order leaks, seeded RNG only | F1 | `[~]` |
+| F3 | Bare-bones WASM build playable in a browser (no threads, no SIMD) | F1 | `[x]` |
 | F4 | Verify determinism empirically: same input sequence → same trace, natively and in WASM; note any native-vs-WASM divergence | F2, F3 | `[ ]` |
 | F5 | Input trace format + record/replay: save a play session as a trace file, replay it to an identical outcome | F2 | `[ ]` |
 | F6 | Random input trace generator — the first fuzzing primitive | F5 | `[ ]` |
@@ -58,8 +58,8 @@ graph LR
 
 | ID | Task | Depends on | Status |
 |----|------|-----------|--------|
-| F8 | Support user-authored LDtk levels, starting with one simple example level; must preserve web play, determinism, and replay | F4, F5 | `[ ]` |
-| F9 | Minimal asset story for custom levels: bundled default tileset/sprites; user-supplied assets later | F8 | `[ ]` |
+| F8 | Support user-authored LDtk levels, starting with one simple example level; must preserve web play, determinism, and replay | F4, F5 | `[~]` |
+| F9 | Minimal asset story for custom levels: bundled default tileset/sprites; user-supplied assets later | F8 | `[~]` |
 | F10 | IJON-style state annotations (e.g. maximize player x) exposing ECS state to an exploration harness | F5, F8 | `[ ]` |
 | F11 | First exploration experiment: drive the game with generated traces against an annotated level; evaluate existing tools (per F7) vs. new harness | F6, F7, F10 | `[ ]` |
 
@@ -76,3 +76,7 @@ Not yet tasks — direction notes, roughly in order of interest:
 - Other genres (Zelda-likes, Metroidvanias) and customizable character moves (e.g. Ori-style bash).
 
 ## Log
+- 2026-09-07 22:20 F2: Scouting round 1: gameplay on FixedUpdate at 60 Hz, tick-sampled input (TickInput). Remaining: HashMap/ordering audit, seeded RNG, empirical verification (F4).
+- 2026-09-07 22:20 F8: Scouting round 1: LevelSource + switching, user:// upload source, template + 3 generated starter levels, docs/making-levels.md. Remaining: kill plane, level-complete condition, Door semantics.
+- 2026-09-07 22:20 F9: Scouting round 1: bundled SunnyLand + Caz atlases pre-seeded for uploads; custom tilesets not yet supported.
+- 2026-09-07 22:24 F3: Static Trunk bundle (dist/): WebGL2, atlas tilemaps, level picker + .ldtk file upload. Verified in headless Chrome for Testing 152 (SwiftShader): 0 console errors, levels spawn, screenshot framed correctly. Build: trunk build --cargo-profile wasm-release (~3-5 min); 38 MB dist, 10 MB gzipped wasm.

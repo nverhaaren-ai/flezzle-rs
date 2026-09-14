@@ -1,0 +1,11 @@
+[build]
+target = "web/index.html"
+dist = "dist"
+release = true
+# Bundles are served from a subdirectory on GitHub Pages; relative URLs keep
+# them relocatable (open dist/index.html via any static file server).
+public_url = "./"
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 8080

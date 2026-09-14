@@ -80,8 +80,8 @@ pub struct ClimbingPlugin;
 
 impl Plugin for ClimbingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, detect_climb_range)
-            .add_systems(Update, ignore_gravity_if_climbing)
+        app.add_systems(FixedUpdate, detect_climb_range.in_set(crate::GameplaySet::Sense))
+            .add_systems(FixedUpdate, ignore_gravity_if_climbing.in_set(crate::GameplaySet::Act))
             .register_ldtk_int_cell::<LadderBundle>(2);
     }
 }

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
+use crate::input::{Action, TickInput};
 use crate::player::Player;
 
 #[derive(Clone, Component, Debug, Eq, Default, PartialEq)]
@@ -20,11 +21,11 @@ impl From<&EntityInstance> for Inventory {
 
 /// Prints the contents of the player's inventory.
 pub fn dbg_print_inventory(
-    input: Res<ButtonInput<KeyCode>>,
+    input: Res<TickInput>,
     mut query: Query<(&Inventory, &EntityInstance), With<Player>>,
 ) {
     for (items, entity_instance) in &mut query {
-        if input.just_pressed(KeyCode::KeyP) {
+        if input.just_pressed(Action::PrintInventory) {
             dbg!(&items);
             dbg!(&entity_instance);
         }
