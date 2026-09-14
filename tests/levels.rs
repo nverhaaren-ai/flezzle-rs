@@ -135,3 +135,75 @@ fn camera_frames_the_players_level() {
         "player {player} is not inside the camera window starting at {cam}"
     );
 }
+
+/// Press R after walking right; return (spawn x, x before R, x after R, snapshots).
+fn restart_probe() -> (f32, f32, f32, flezzle_rs::debug::DebugSnapshot, flezzle_rs::debug::DebugSnapshot) {
+    use bevy::input::keyboard::Key;
+    use bevy::input::ButtonState;
+    use flezzle_rs::debug::DebugSnapshot;
+
+    let mut app = headless_app_for(Some("levels/first-steps.ldtk"));
+    let spawn = spawn_and_settle(&mut app);
+    let before = app.world().resource::<DebugSnapshot>().clone();
+
+    // Walk right for a second so a restart would visibly move the player.
+    send_key(&mut app, KeyCode::KeyD, Key::Character("d".into()), ButtonState::Pressed);
+    for _ in 0..60 {
+        app.update();
+    }
+    send_key(&mut app, KeyCode::KeyD, Key::Character("d".into()), ButtonState::Released);
+    let moved = player_pos(&mut app).unwrap();
+    assert!(moved.x > spawn.x + 10.0, "precondition: player moved");
+
+    send_key(&mut app, KeyCode::KeyR, Key::Character("r".into()), ButtonState::Pressed);
+    app.update();
+    send_key(&mut app, KeyCode::KeyR, Key::Character("r".into()), ButtonState::Released);
+    for _ in 0..180 {
+        app.update();
+    }
+    let after = app.world().resource::<DebugSnapshot>().clone();
+    let pos = player_pos(&mut app).unwrap();
+    (spawn.x, moved.x, pos.x, before, after)
+}
+
+/// The restart key's *mechanism* works: the level despawns and respawns.
+#[test]
+fn restart_key_reloads_the_level() {
+    let (_, _, _, before, after) = restart_probe();
+    assert!(
+        after.level_despawns > before.level_despawns && after.level_spawns > before.level_spawns,
+        "R should despawn and respawn the level"
+    );
+}
+
+/// What the owner expects of restart: the player is back at the spawn point.
+/// Currently NOT the behaviour — the player is `Worldly` and survives level
+/// reloads (upstream example semantics), so R looks like it does nothing
+/// unless enemies or the chest had moved. Un-ignore when restart is redefined.
+#[test]
+#[ignore = "restart does not yet reset the player; see workbook scouting notes 02"]
+fn restart_key_resets_player_to_spawn() {
+    let (spawn_x, _, after_x, _, _) = restart_probe();
+    assert!(
+        (after_x - spawn_x).abs() < 4.0,
+        "R should put the player back at the spawn point (x {after_x:.1}, spawn {spawn_x:.1})"
+    );
+}
+
+/// Issue 4 from the browser playtest: the player flipped behind the chest
+/// after a moment. Both spawned at the same LDtk layer depth (z = 9), so the
+/// draw order was arbitrary. The player is now pinned above everything.
+#[test]
+fn player_is_drawn_above_chest() {
+    use flezzle_rs::debug::DebugSnapshot;
+    let mut app = headless_app_for(Some("levels/template.ldtk"));
+    spawn_and_settle(&mut app);
+    let snap = app.world().resource::<DebugSnapshot>().clone();
+    let (player, chest) = (snap.player.expect("player"), snap.chest.expect("chest"));
+    assert!(
+        player.body.z > chest.z,
+        "player z {} should exceed chest z {}",
+        player.body.z,
+        chest.z
+    );
+}

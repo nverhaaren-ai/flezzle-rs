@@ -3,12 +3,17 @@ use bevy_ecs_ldtk::prelude::*;
 
 use crate::colliders::ColliderBundle;
 
+/// Marker for chests (heavy pushable boxes).
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
+pub struct Chest;
+
 #[derive(Clone, Default, Bundle, LdtkEntity)]
 pub struct ChestBundle {
     #[sprite_sheet]
     pub sprite_sheet: Sprite,
     #[from_entity_instance]
     pub collider_bundle: ColliderBundle,
+    pub chest: Chest,
 }
 
 #[derive(Clone, Default, Bundle, LdtkEntity)]

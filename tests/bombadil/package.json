@@ -1,0 +1,12 @@
+{
+  "name": "flezzle-rs-bombadil-tests",
+  "description": "Bombadil property tests for the flezzle-rs web build",
+  "scripts": {
+    "test": "./run.sh"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "@antithesishq/bombadil": "^0.7.5"
+  },
+  "private": true
+}

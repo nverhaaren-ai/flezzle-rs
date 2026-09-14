@@ -60,11 +60,33 @@ pub fn player_movement(
     }
 }
 
+/// Draw depth for the player. LDtk spawns every entity in a layer at the same
+/// z (9 in the sample project), so the player and the chest tie and Bevy's
+/// sprite order becomes arbitrary — the player visibly flips behind the chest.
+/// The player is drawn above every other entity.
+pub const PLAYER_Z: f32 = 20.0;
+
+fn keep_player_on_top(mut players: Query<&mut Transform, With<Player>>) {
+    for mut transform in &mut players {
+        if transform.translation.z != PLAYER_Z {
+            transform.translation.z = PLAYER_Z;
+        }
+    }
+}
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, player_movement.in_set(crate::GameplaySet::Act))
+            // PostUpdate, before transform propagation, so the rendered
+            // GlobalTransform carries the depth every frame — including the
+            // frame LDtk re-parents the (Worldly) player and rewrites its
+            // translation.
+            .add_systems(
+                PostUpdate,
+                keep_player_on_top.before(bevy::transform::TransformSystems::Propagate),
+            )
             .register_ldtk_entity::<PlayerBundle>("Player");
     }
 }

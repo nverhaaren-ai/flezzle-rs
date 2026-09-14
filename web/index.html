@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flezzle-rs</title>
   <link rel="icon" href="data:,">
-  <link data-trunk rel="rust" href="../Cargo.toml" data-bin="flezzle-rs" data-wasm-opt="s">
+  <!-- data-integrity="none": no subresource-integrity hashes. Test drivers that
+       instrument JavaScript for coverage (Bombadil) rewrite the module files,
+       and SRI would then silently refuse to load the game. -->
+  <link data-trunk rel="rust" href="../Cargo.toml" data-bin="flezzle-rs" data-wasm-opt="s" data-integrity="none">
   <link data-trunk rel="copy-dir" href="../assets">
   <style>
     :root { color-scheme: dark; }

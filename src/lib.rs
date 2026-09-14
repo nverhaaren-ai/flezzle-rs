@@ -16,6 +16,7 @@ use bevy_ecs_ldtk::prelude::*;
 pub mod camera;
 pub mod climbing;
 pub mod colliders;
+pub mod debug;
 pub mod enemy;
 pub mod game_flow;
 pub mod ground_detection;
@@ -58,6 +59,7 @@ impl Plugin for GamePlugin {
             )
             .add_plugins(input::TickInputPlugin)
             .add_plugins(level::LevelPlugin)
+            .add_plugins(debug::DebugSnapshotPlugin)
             .insert_resource(Gravity(Vec2::new(0.0, -2000.0)))
             .insert_resource(LdtkSettings {
                 level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {

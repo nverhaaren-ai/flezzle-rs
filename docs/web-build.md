@@ -40,6 +40,7 @@ never leaves your machine. Click the canvas if keys don't register.
 |---|---|---|
 | Page, level picker, upload glue | `web/index.html` | The game polls `window.flezzlePendingLevel` for uploads |
 | Trunk settings | `Trunk.toml` | `public_url = "./"` keeps the bundle relocatable (subdirectory hosting) |
+| No SRI hashes | `web/index.html` `data-integrity="none"` | Test drivers that instrument JS for coverage (Bombadil) rewrite the module files; with integrity hashes the game silently never boots |
 | Size-optimised profile | `Cargo.toml` `[profile.wasm-release]` | `opt-level = "s"`, fat LTO; Trunk also runs `wasm-opt -Os` |
 | wasm-only deps | `Cargo.toml` `[target.'cfg(target_arch = "wasm32")']` | `web-sys`/`js-sys` for the URL and upload glue; `getrandom` JS backend |
 | getrandom backend cfg | `.cargo/config.toml` | Required by `getrandom` 0.3 on `wasm32-unknown-unknown` |

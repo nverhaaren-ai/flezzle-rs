@@ -21,6 +21,12 @@ graph LR
   F9["F9 Minimal asset story for custom levels: bundled …"]:::inprogress
   F10["F10 IJON-style state annotations (e.g. maximize pla…"]:::pending
   F11["F11 First exploration experiment: drive the game wi…"]:::pending
+  T1["T1 Observable game state: per-frame `DebugSnapshot…"]:::done
+  T2["T2 Browser property tests with Bombadil (`tests/bo…"]:::inprogress
+  T3["T3 Restart semantics: R resets the player (current…"]:::pending
+  T4["T4 Render interpolation so rendered walking speed …"]:::pending
+  T5["T5 CI: `cargo test` headless + `trunk build` + a s…"]:::pending
+  T6["T6 Out-of-level handling: kill plane / respawn whe…"]:::pending
   F1 --> F2
   F1 --> F3
   F2 --> F4
@@ -35,6 +41,12 @@ graph LR
   F6 --> F11
   F7 --> F11
   F10 --> F11
+  F3 --> T1
+  T1 --> T2
+  T2 --> T3
+  T2 --> T4
+  T2 --> T5
+  T2 --> T6
   classDef pending fill:#3a3a3a,stroke:#666,color:#ddd;
   classDef inprogress fill:#b8860b,stroke:#daa520,color:#fff;
   classDef done fill:#1f7a3f,stroke:#2ea043,color:#fff;
@@ -63,6 +75,17 @@ graph LR
 | F10 | IJON-style state annotations (e.g. maximize player x) exposing ECS state to an exploration harness | F5, F8 | `[ ]` |
 | F11 | First exploration experiment: drive the game with generated traces against an annotated level; evaluate existing tools (per F7) vs. new harness | F6, F7, F10 | `[ ]` |
 
+## Testing
+
+| ID | Task | Depends on | Status |
+|----|------|-----------|--------|
+| T1 | Observable game state: per-frame `DebugSnapshot` (native resource; `window.flezzle` + DOM JSON on the web) | F3 | `[x]` |
+| T2 | Browser property tests with Bombadil (`tests/bombadil/`): boot, liveness, draw order, smooth walking, restart, chest push; per-level runner | T1 | `[~]` |
+| T3 | Restart semantics: R resets the player (currently `Worldly` survives reloads); un-ignore `restart_key_resets_player_to_spawn` | T2 | `[ ]` |
+| T4 | Render interpolation so rendered walking speed is smooth at any refresh rate (Avian interpolation + camera); make `smoothWalking` pass on real displays | T2 | `[ ]` |
+| T5 | CI: `cargo test` headless + `trunk build` + a short Bombadil run per level | T2 | `[ ]` |
+| T6 | Out-of-level handling: kill plane / respawn when the player leaves the level (found by Bombadil on a wall-less level); keep `playerStaysInLevel` honest | T2 | `[ ]` |
+
 ## Later (unscheduled)
 
 Not yet tasks — direction notes, roughly in order of interest:
@@ -80,3 +103,5 @@ Not yet tasks — direction notes, roughly in order of interest:
 - 2026-09-07 22:20 F8: Scouting round 1: LevelSource + switching, user:// upload source, template + 3 generated starter levels, docs/making-levels.md. Remaining: kill plane, level-complete condition, Door semantics.
 - 2026-09-07 22:20 F9: Scouting round 1: bundled SunnyLand + Caz atlases pre-seeded for uploads; custom tilesets not yet supported.
 - 2026-09-07 22:24 F3: Static Trunk bundle (dist/): WebGL2, atlas tilemaps, level picker + .ldtk file upload. Verified in headless Chrome for Testing 152 (SwiftShader): 0 console errors, levels spawn, screenshot framed correctly. Build: trunk build --cargo-profile wasm-release (~3-5 min); 38 MB dist, 10 MB gzipped wasm.
+- 2026-09-14 04:11 T1: DebugSnapshot: per-frame resource natively; window.flezzle + <script id=flezzle-state> JSON on the web. Verified readable by Bombadil extractors.
+- 2026-09-14 04:11 T2: Round 2 (2026-09-13): boot/liveness/draw-order pass; smoothWalking and chestCanBePushed fail as intended (T4, tuning); Bombadil PressKey does not reach winit (code = key name), synthetic taps used; found wall-less template + inescapable pit.

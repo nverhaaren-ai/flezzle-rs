@@ -41,8 +41,12 @@ and run `tools/ldtk_gen.py`. The contract between editor and runner is in
 ## Test
 
 ```bash
-cargo test           # headless smoke tests — no window or GPU needed
+cargo test           # headless tests: no window or GPU needed
 ```
+
+Property-based tests of the *browser* build (Bombadil, random exploration
+against invariants) live in [`tests/bombadil/`](tests/bombadil/README.md).
+The game publishes a per-frame state snapshot for them (`src/debug.rs`).
 
 ## Companion workbook
 
